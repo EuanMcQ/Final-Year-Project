@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Page</title>
+    <link rel="stylesheet" href="profile.component.css">
+    <script defer src="profile.component.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="left-div"></div>
+        <div class="center-div">
+          <form class="profile-form">
+            <div class="upload-section">
+              <div class="image-frame">
+                <label for="profile-picture" class="upload-label">Choose Image</label>
+                <input type="file" id="profile-picture" (change)="uploadedImage($event)" accept="image/*">
+                <img *ngIf="imagePreview" [src]="imagePreview" alt="Selected Image" id="image-preview" />
+              </div>
+              <button type="button" id="save-button">Save</button>
+            </div>
+          </form>
+            <div class="name-section">
+              <label for="name">Name</label>
+              <input type="text" id="name" name="userName" [(ngModel)]="userName" autocomplete="name" readonly>
+            </div>
+           <form class="description-input" (ngSubmit)="onDescriptionSubmit()">
+            <div class="about-section">
+              <label for="about">About Me:</label>
+              <input type="text" placeholder="Write something about yourself..." id="description" name="description" [(ngModel)]="description">
+            </div>
+            <button id="description-submit" type="submit" class="submit-btn">Save Description</button>
+           </form>
+          <button class="back-arrow" [routerLink]="'/dashboard'">&#8592; Back</button>
+        </div>
+        <div class="right-div"></div>
+      </div>          
+</body>
+</html>
