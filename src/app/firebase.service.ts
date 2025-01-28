@@ -145,7 +145,7 @@ export class FirebaseService {
 
       if (docSnapshot.exists()) {
         const users = docSnapshot.data()?.['users'] || [];
-        const updatedUsers = users.map((u: any) =>
+        const updatedUsers = users.map((u: any) => //Update the description if it changes.
           u.username === user.username ? { ...u, description } : u
         );
 
@@ -163,19 +163,19 @@ export class FirebaseService {
 
   // Get user description
   async getUserDescription(): Promise<string | null> {
-    const user = this.getUserFullName();
+    const user = this.getUserFullName(); //get user full name
     if (!user) {
       throw new Error('No logged-in user.');
     }
 
     try {
-      const credentialsDocRef = doc(this.db, 'User', 'Credentials');
-      const docSnapshot = await getDoc(credentialsDocRef);
+      const credentialsDocRef = doc(this.db, 'User', 'Credentials'); //Reference Firebase db
+      const docSnapshot = await getDoc(credentialsDocRef); //fetch document
 
-      if (docSnapshot.exists()) {
-        const users = docSnapshot.data()?.['users'] || [];
-        const matchedUser = users.find((u: any) => u.username === user.username);
-        return matchedUser?.description || null;
+      if (docSnapshot.exists()) { //check document it exists
+        const users = docSnapshot.data()?.['users'] || []; //retrieve the users to match and ensure
+        const matchedUser = users.find((u: any) => u.username === user.username); //Find the matching user
+        return matchedUser?.description || null; //return if exists
       } else {
         throw new Error('No credentials document found.');
       }
@@ -185,8 +185,55 @@ export class FirebaseService {
     }
   }
 
-  // Placeholder for getting user image
-  getUserImage(): void {
-    // Implement this if needed
+  async addImageToFirestore(image: string): Promise<void> {
+    const user = this.getUserFullName();
+    if (!user) {
+      throw new Error('No logged-in user');
+    }
+  
+    try {
+      const credentialsDocRef = doc(this.db, 'User', 'Credentials');
+      const docSnapshot = await getDoc(credentialsDocRef);
+  
+      if (docSnapshot.exists()) {
+        const users = docSnapshot.data()?.['users'] || [];
+        const updatedUsers = users.map((u: any) => //update the image if the username does match
+          u.username === user.username ? { ...u, image } : u
+        );
+  
+        // Save the updated users array back to Firestore
+        await setDoc(credentialsDocRef, { users: updatedUsers }, { merge: true });
+        console.log('Image updated successfully for:', user.username);
+      } else {
+        throw new Error('No credentials document found.');
+      }
+    } catch (error) {
+      console.error('Error updating image in Firestore:', error);
+      throw error;
+    }
+  }
+  
+
+  async getUserImage(): Promise<string | null> {
+    const user = this.getUserFullName();
+    if (!user) {
+      throw new Error('No logged-in user.');
+    }
+  
+    try {
+      const credentialsDocRef = doc(this.db, 'User', 'Credentials');
+      const docSnapshot = await getDoc(credentialsDocRef);
+  
+      if (docSnapshot.exists()) {
+        const users = docSnapshot.data()?.['users'] || [];
+        const matchedUser = users.find((u: any) => u.username === user.username);
+        return matchedUser?.image || null;  // Fixed to return the image
+      } else {
+        throw new Error('No credentials document found.');
+      }
+    } catch (error) {
+      console.error('Error fetching user image:', error);
+      throw error;
+    }
   }
 }

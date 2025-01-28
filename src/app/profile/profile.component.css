@@ -31,17 +31,29 @@ body, html {
 }
 
 .upload-section {
-    margin: 20px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
 }
 
 .upload-label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 10px;
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+    text-align: center;
+}
+
+.upload-label:hover {
+    background-color: #0056b3;
 }
 
 input[type="file"] {
-    display: block;
+    display: none;
     margin: 0 auto;
 }
 
@@ -61,8 +73,6 @@ input[type="file"] {
 .image-frame img {
     width: 100%;
     height: 100%;
-    align-items: center;
-    justify-content: center;
     object-fit: cover;
 }
 
