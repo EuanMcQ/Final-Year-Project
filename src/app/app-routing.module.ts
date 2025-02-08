@@ -5,13 +5,15 @@ import { SignUpComponent } from './sign-up/sign-up.component';
 import { WelcomePageComponent } from './welcome-page/welcome-page.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { ProfileComponent } from './profile/profile.component';
+import { HelpingHandComponent } from './helping-hand/helping-hand.component';
 
 const routes: Routes = [ //path declerations
   {path: '', component: WelcomePageComponent},
   {path: 'Login', component: LoginComponent},
   {path: 'signUp', component: SignUpComponent},
   {path: 'dashboard', component: DashboardComponent}, 
-  {path: 'profile', component: ProfileComponent}
+  {path: 'profile', component: ProfileComponent},
+  {path: 'helpingHand', component:HelpingHandComponent}
 ];
 
 @NgModule({
