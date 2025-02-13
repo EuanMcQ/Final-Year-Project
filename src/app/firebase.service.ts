@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { FirebaseApp, initializeApp } from 'firebase/app';
-import { getFirestore, doc, setDoc, getDoc, arrayUnion } from 'firebase/firestore';
+import { getFirestore, getDoc, doc, setDoc, arrayUnion, updateDoc} from 'firebase/firestore';
 
 @Injectable({
   providedIn: 'root',
@@ -234,6 +234,65 @@ export class FirebaseService {
     } catch (error) {
       console.error('Error fetching user image:', error);
       throw error;
+    }
+  }
+
+  async addTicketForUser(ticket: any): Promise<void> {
+    const user = localStorage.getItem('username'); // Get logged-in username
+    if (!user) {
+      throw new Error('No logged-in user.');
+    }
+
+    try {
+      const ticketsDocRef = doc(this.db, 'tickets', user); // Store tickets per user
+      const docSnapshot = await getDoc(ticketsDocRef);
+
+      if (docSnapshot.exists()) {
+        // If tickets document exists, update it by adding to the array
+        await setDoc(
+          ticketsDocRef,
+          { tickets: arrayUnion(ticket) },
+          { merge: true }
+        );
+      } else {
+        // If document does not exist, create it with the first ticket
+        await setDoc(ticketsDocRef, { tickets: [ticket] });
+      }
+      console.log('Ticket added successfully for:', user);
+    } catch (error) {
+      console.error('Error adding ticket:', error);
+      throw error;
+    }
+  }
+
+  async getTicketsForUser(): Promise<any[]> {
+    const user = this.getUserFullName();
+    if (!user) {
+        throw new Error('No logged-in user.');
+    }
+
+    try {
+        const userDocRef = doc(this.db, 'Tickets', user.username);
+        const docSnapshot = await getDoc(userDocRef);
+        
+        // Use bracket notation to access 'tickets' field
+        return docSnapshot.data()?.['tickets'] || [];
+    } catch (error) {
+        console.error('Error fetching tickets:', error);
+        throw error;
+    }
+  }
+
+  async incrementTicketCount(user: any, ticket: any): Promise<void> {
+    try {
+        const userDocRef = doc(this.db, 'Tickets', user.username);
+        await updateDoc(userDocRef, {
+            tickets: arrayUnion({ ...ticket, currentCount: (ticket.currentCount || 0) + 1 })
+        });
+        console.log('Ticket count updated successfully.');
+    } catch (error) {
+        console.error('Error updating ticket count:', error);
+        throw error;
     }
   }
 }
