@@ -10,22 +10,21 @@ export class HelpingHandComponent implements OnInit {
   activityName: string = '';
   date: string = '';
   description: string = '';
-  maxCapacity: number | null = null; // Allow maxCapacity to be either a number or null
-  showForm: boolean = false; // Control the visibility of the form modal
-  tickets: any[] = []; // List of created tickets
+  maxCapacity: number | null = null;
+  showForm: boolean = false;
+  tickets: any[] = [];
   newTicket: any = {
     activityName: '',
     date: '',
     description: '',
     maxCapacity: null,
-    currentCount: 0 // Track how many people accepted
+    currentCount: 0
   };
 
   constructor(private firebaseService: FirebaseService) {}
 
   async ngOnInit() {
-    // Fetch tickets on component load
-    this.tickets = await this.firebaseService.getTicketsForUser();
+    this.tickets = await this.firebaseService.getAllTickets();
   }
 
   openForm() {
@@ -41,7 +40,7 @@ export class HelpingHandComponent implements OnInit {
       await this.firebaseService.addTicketForUser(this.newTicket);
 
       // Fetch updated tickets list from Firestore
-      this.tickets = await this.firebaseService.getTicketsForUser();
+      this.tickets = await this.firebaseService.getAllTickets();
 
       // Reset the form
       this.newTicket = { activityName: '', date: '', description: '', maxCapacity: null, currentCount: 0 };
@@ -51,19 +50,27 @@ export class HelpingHandComponent implements OnInit {
     }
   }
 
-  async acceptTicket(ticket: any) {
-    const user = localStorage.getItem('username');
-    if (!user) return;
-
-    if (ticket.currentCount < ticket.maxCapacity) {
-      await this.firebaseService.incrementTicketCount(user, ticket);
-
-      // Fetch updated ticket list
-      this.tickets = await this.firebaseService.getTicketsForUser();
+  async onAcceptTicket(ticket: any) {
+    try {
+      // Call the incrementTicketCount method
+      await this.firebaseService.incrementTicketCount(ticket);
+  
+      // Refresh the ticket list after accepting
+      this.tickets = await this.firebaseService.getAllTickets();
+      console.log('Ticket accepted!');
+    } catch (error) {
+      console.error('Error accepting ticket:', error);
     }
   }
-
-  isMaxCapacityReached(ticket: any): boolean {
-    return ticket.currentCount >= ticket.maxCapacity;
+  
+  
+  hasUserAccepted(ticket: any): boolean {
+    const username = localStorage.getItem('username');
+    return ticket.usersAccepted && ticket.usersAccepted.includes(username); // Check if user has already accepted
   }
+  
+  isMaxCapacityReached(ticket: any): boolean {
+    return ticket.currentCount >= ticket.maxCapacity; // Check if max capacity is reached
+  }  
 }
+

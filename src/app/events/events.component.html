@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Events</title>
+    <link rel="stylesheet" href="events.component.css">
+</head>
+<body>   
+  <div class="event-container">
+    <div *ngFor="let event of events" class="event">
+      <h3>{{ event.creator }}</h3> 
+      <h3>{{ event.activityName }}</h3>
+      <p>{{ event.date }}</p>
+      <p>{{ event.description }}</p>
+      <p>Max Capacity: {{ event.maxCapacity }}</p>
+      <p>Accepted: {{ event.currentCount }} / {{ event.maxCapacity }}</p>
+  
+      <button *ngIf="!isMaxCapacityReached(event) && !hasUserAccepted(event)" (click)="onAcceptEvent(event)">
+        Accept
+      </button>                  
+    </div>
+  </div>
+  
+
+  <button class="create-button" (click)="openForm()">Create</button>
+  
+  <h1 *ngIf="events.length === 0">Be the first to add an event!</h1>
+  
+  <button class="back-arrow" routerLink="/dashboard">&#8592; Back</button>
+
+  <div class="modal" *ngIf="showForm">
+    <div class="modal-content">
+      <h2>Create Event</h2>
+      <form (ngSubmit)="addEvent()">
+        <label for="activityName">Activity Name:</label>
+        <input type="text" id="activityName" [(ngModel)]="newEvent.activityName" name="activityName" required>
+
+        <label for="date">Date:</label>
+        <input type="date" id="date" [(ngModel)]="newEvent.date" name="date" required>
+
+        <label for="description">Description:</label>
+        <textarea id="description" [(ngModel)]="newEvent.description" name="description"></textarea>
+
+        <label for="maxCapacity">Max Capacity:</label>
+        <input type="number" id="maxCapacity" [(ngModel)]="newEvent.maxCapacity" name="maxCapacity" required>
+
+        <button type="submit">Done</button>
+        <button type="button" (click)="closeForm()">Cancel</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

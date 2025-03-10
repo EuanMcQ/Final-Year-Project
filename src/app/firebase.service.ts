@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { FirebaseApp, initializeApp } from 'firebase/app';
-import { getFirestore, getDoc, doc, setDoc, arrayUnion, updateDoc} from 'firebase/firestore';
+import { collection, getFirestore, getDoc, getDocs, doc, setDoc, arrayUnion, updateDoc} from 'firebase/firestore';
 
 @Injectable({
   providedIn: 'root',
@@ -238,61 +238,281 @@ export class FirebaseService {
   }
 
   async addTicketForUser(ticket: any): Promise<void> {
-    const user = localStorage.getItem('username'); // Get logged-in username
-    if (!user) {
-      throw new Error('No logged-in user.');
+    const username = localStorage.getItem('username');
+    const firstName = localStorage.getItem('firstName');
+    const lastName = localStorage.getItem('lastName');
+  
+    if (!username || !firstName || !lastName) {
+      throw new Error('User details are missing.');
+    }
+  
+    // Add the creator field with the full name and initialize usersAccepted array
+    const newTicket = {
+      ...ticket,
+      creator: `${firstName} ${lastName}`,
+      username: username,
+      usersAccepted: [], // Initialize an empty array to track accepted users
+    };
+  
+    console.log("Saving ticket:", newTicket);
+  
+    try {
+      // Store ticket under the user's document
+      const ticketsDocRef = doc(this.db, 'tickets', username);
+      const docSnapshot = await getDoc(ticketsDocRef);
+  
+      if (docSnapshot.exists()) {
+        // If document exists, add the ticket to the user's ticket list
+        await setDoc(ticketsDocRef, { tickets: arrayUnion(newTicket) }, { merge: true });
+      } else {
+        // If document doesn't exist, create a new one with the ticket list
+        await setDoc(ticketsDocRef, { tickets: [newTicket] });
+      }
+  
+      console.log('Ticket added successfully for:', username);
+    } catch (error) {
+      console.error('Error adding ticket:', error);
+      throw error;
+    }
+  }  
+
+  async getAllTickets(): Promise<any[]> {
+    try {
+        const ticketsCollectionRef = collection(this.db, 'tickets');
+        const querySnapshot = await getDocs(ticketsCollectionRef);
+        let allTickets: any[] = [];
+
+        querySnapshot.forEach((doc) => {
+            const userTickets = doc.data()?.['tickets'] || [];
+            userTickets.forEach((ticket: any) => {
+                allTickets.push(ticket);
+            });
+        });
+
+        return allTickets;
+    } catch (error) {
+        console.error('Error fetching all tickets:', error);
+        throw error;
+    }
+  }
+
+
+
+  async incrementTicketCount(ticket: any): Promise<void> {
+    const username = localStorage.getItem('username');
+    if (!username) {
+      throw new Error('No logged-in user');
+    }
+  
+    try {
+      const ticketsDocRef = doc(this.db, 'tickets', ticket.username); // Reference to the creator's ticket document
+      const docSnapshot = await getDoc(ticketsDocRef); // Get the user's tickets document
+  
+      if (docSnapshot.exists()) {
+        const ticketsData = docSnapshot.data()?.['tickets'] || []; // Array of tickets
+  
+        // Find the specific ticket by activityName and date
+        const ticketIndex = ticketsData.findIndex(
+          (t: any) => t.activityName === ticket.activityName && t.date === ticket.date
+        );
+  
+        if (ticketIndex !== -1) {
+          // Get the current list of users who have accepted this ticket
+          const usersAccepted = ticketsData[ticketIndex].usersAccepted || [];
+  
+          // Check if the user has already accepted this ticket
+          if (usersAccepted.includes(username)) {
+            console.log('You have already accepted this ticket.');
+            return; // Prevent multiple accepts by the same user
+          }
+  
+          // Check if there's still space left (maxCapacity not reached)
+          if (ticketsData[ticketIndex].currentCount < ticketsData[ticketIndex].maxCapacity) {
+            // Increment the current count of the ticket
+            ticketsData[ticketIndex].currentCount += 1;
+  
+            // Add the username to the accepted users list
+            usersAccepted.push(username);
+            ticketsData[ticketIndex].usersAccepted = usersAccepted;
+  
+            // Save the updated ticket data back to Firestore
+            await setDoc(ticketsDocRef, { tickets: ticketsData }, { merge: true });
+            console.log('Ticket count updated successfully!');
+          } else {
+            console.log('Max capacity reached.');
+          }
+        } else {
+          console.error('Ticket not found.');
+        }
+      } else {
+        console.error('No tickets document found for this user.');
+      }
+    } catch (error) {
+      console.error('Error updating ticket count:', error);
+      throw error;
+    }
+  } 
+
+  async addTicketForUserEvents(event: any): Promise<void> {
+    const username = localStorage.getItem('username');
+    const firstName = localStorage.getItem('firstName');
+    const lastName = localStorage.getItem('lastName');
+
+    if (!username || !firstName || !lastName) {
+      throw new Error('User details are missing.');
     }
 
+    // Create event object with creator info
+    const newEvent = {
+      ...event,
+      creator: `${firstName} ${lastName}`,
+      username,
+      usersAccepted: [], // Initialize accepted users array
+      currentCount: 0, // Ensure we have an initial count
+    };
+
+    console.log('Saving event:', newEvent);
+
     try {
-      const ticketsDocRef = doc(this.db, 'tickets', user); // Store tickets per user
-      const docSnapshot = await getDoc(ticketsDocRef);
+      const eventsDocRef = doc(this.db, 'events', username);
+      const docSnapshot = await getDoc(eventsDocRef);
 
       if (docSnapshot.exists()) {
-        // If tickets document exists, update it by adding to the array
-        await setDoc(
-          ticketsDocRef,
-          { tickets: arrayUnion(ticket) },
-          { merge: true }
-        );
+        // Merge new ticket with existing tickets
+        await setDoc(eventsDocRef, { tickets: arrayUnion(newEvent) }, { merge: true });
       } else {
-        // If document does not exist, create it with the first ticket
-        await setDoc(ticketsDocRef, { tickets: [ticket] });
+        // Create a new document with the ticket array
+        await setDoc(eventsDocRef, { tickets: [newEvent] });
       }
-      console.log('Ticket added successfully for:', user);
+
+      console.log('Event added successfully for:', username);
     } catch (error) {
       console.error('Error adding ticket:', error);
       throw error;
     }
   }
 
-  async getTicketsForUser(): Promise<any[]> {
-    const user = this.getUserFullName();
-    if (!user) {
-        throw new Error('No logged-in user.');
-    }
-
+  async getAllTicketsEvents(): Promise<any[]> {
     try {
-        const userDocRef = doc(this.db, 'Tickets', user.username);
-        const docSnapshot = await getDoc(userDocRef);
-        
-        // Use bracket notation to access 'tickets' field
-        return docSnapshot.data()?.['tickets'] || [];
-    } catch (error) {
-        console.error('Error fetching tickets:', error);
-        throw error;
-    }
-  }
+      const eventsCollectionRef = collection(this.db, 'events');
+      const querySnapshot = await getDocs(eventsCollectionRef);
+      let allEvents: any[] = [];
 
-  async incrementTicketCount(user: any, ticket: any): Promise<void> {
-    try {
-        const userDocRef = doc(this.db, 'Tickets', user.username);
-        await updateDoc(userDocRef, {
-            tickets: arrayUnion({ ...ticket, currentCount: (ticket.currentCount || 0) + 1 })
+      querySnapshot.forEach((doc) => {
+        const userEvents = doc.data()?.['events'] || [];
+        userEvents.forEach((event: any) => {
+	      allEvents.push(event);
         });
-        console.log('Ticket count updated successfully.');
+      });
+
+      return allEvents;
     } catch (error) {
-        console.error('Error updating ticket count:', error);
-        throw error;
+      console.error('Error fetching all tickets:', error);
+      throw error;
     }
   }
+
+  async incrementTicketCountEvents(event: any): Promise<void> {
+    const username = localStorage.getItem('username');
+    if (!username) {
+      throw new Error('No logged-in user');
+    }
+
+    try {
+      const eventsDocRef = doc(this.db, 'events', event.username); // Reference to creator's tickets
+      const docSnapshot = await getDoc(eventsDocRef);
+
+      if (docSnapshot.exists()) {
+        let eventData = docSnapshot.data()?.['events'] || []; // Retrieve event tickets
+
+        // Find specific event in tickets
+        const eventIndex = eventData.findIndex(
+          (e: any) => e.activityName === event.activityName && e.date === event.date
+        );
+
+        if (eventIndex !== -1) {
+          const selectedEvent = eventData[eventIndex];
+          const usersAccepted = selectedEvent.usersAccepted || [];
+
+          // Prevent duplicate user acceptance
+          if (usersAccepted.includes(username)) {
+            console.log('You have already accepted this event.');
+            return;
+          }
+
+          // Check capacity
+          if (selectedEvent.currentCount < selectedEvent.maxCapacity) {
+            selectedEvent.currentCount += 1;
+            selectedEvent.usersAccepted.push(username); // Add user
+
+            // Update Firestore with new data
+            eventData[eventIndex] = selectedEvent;
+            await setDoc(eventsDocRef, { events: eventData }, { merge: true });
+
+            console.log('event count updated successfully!');
+          } else {
+            console.log('Max capacity reached.');
+          }
+        } else {
+          console.error('Event not found.');
+        }
+      } else {
+        console.error('No events document found for this user.');
+      }
+    } catch (error) {
+      console.error('Error updating event count:', error);
+      throw error;
+    }
+  }
+  async addComplaintToFirebase(postId: string, complaintText: string, username: string): Promise<void> {
+    // Validate inputs to ensure they are not undefined
+    if (!postId || !complaintText || !username) {
+      console.error('Invalid data for complaint submission:', postId, complaintText, username);
+      throw new Error('Complaint data is invalid');
+    }
+
+    // Get the post details (e.g., content and author) based on postId
+    const postDetails = this.getPostDetails(postId);  // Method to retrieve the post details from localStorage or Firebase
+
+    const complaintData = {
+      complaint: complaintText,
+      date: new Date(),
+      reportedBy: username,  // Store the username of the person reporting
+      reportedByName: localStorage.getItem('fullName') || 'Anonymous',  // Store the full name if available
+      postId: postId,  // Store the ID of the ticket/post being complained about
+      postContent: postDetails.content,  // Store the content of the post being complained about
+      postAuthor: postDetails.author,  // Store the author of the post being reported
+      postAuthorName: postDetails.authorName,  // Store the author's name of the post
+    };
+
+    try {
+      // Document reference for the specific ticket in the 'reports' collection
+      const reportsDocRef = doc(this.db, 'reports', postId);  // Use postId as the document ID
+
+      // Add complaint data to the 'complaints' array under the ticket (postId)
+      await setDoc(
+        reportsDocRef,
+        { complaints: arrayUnion(complaintData) },  // Append the complaint to the complaints array
+        { merge: true }  // Merge data instead of overwriting
+      );
+      console.log('Complaint added to Firestore!');
+    } catch (error) {
+      console.error('Error adding complaint to Firestore:', error);
+      throw error;
+    }
+  }
+
+  // Helper method to retrieve post details based on postId (could be from localStorage or Firebase)
+  getPostDetails(postId: string): any {
+    // For now, let's assume we are getting it from localStorage (or you can fetch it from Firebase if needed)
+    const savedPosts = JSON.parse(localStorage.getItem('bulletinPosts') || '[]');
+    const post = savedPosts.find((p: any) => p.id === postId);
+    
+    return {
+      content: post?.content || 'No content available',
+      author: post?.author || 'Unknown author',
+      authorName: post?.author || 'Unknown author' // You could use full name from localStorage if available
+    };
+  }
+
 }

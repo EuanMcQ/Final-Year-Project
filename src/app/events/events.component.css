@@ -1,0 +1,138 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #064635;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    flex-direction: column;
+    position: relative; 
+  }
+  
+  .create-button {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #007BFF;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .create-button:hover {
+    background-color: #0056b3;
+  }
+  
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 300px;
+  }
+  
+  form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  label {
+    margin-top: 10px;
+  }
+  
+  input, textarea {
+    padding: 8px;
+    margin-bottom: 10px;
+  }
+  
+  button {
+    padding: 8px;
+    margin-top: 10px;
+    cursor: pointer;
+  }
+  
+  button[type="submit"] {
+    background-color: #28a745;
+    color: white;
+  }
+  
+  button[type="submit"]:hover {
+    background-color: #218838;
+  }
+  
+  button[type="button"] {
+    background-color: #dc3545;
+    color: white;
+  }
+  
+  button[type="button"]:hover {
+    background-color: #c82333;
+  }
+  
+  .event-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+    width: 80%;
+    max-width: 1200px;
+  }
+  
+  .event {
+    background-color: #ffffff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  .accept-button {
+    background-color: #17a2b8;
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .accept-button:hover {
+    background-color: #138496;
+  }
+  
+  .back-arrow {
+    background-color: #007bff;
+    color: white;
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+  }
+  
+  .back-arrow:hover {
+    background-color: #0056b3;
+  }
+  
+  h1 {
+    color: white;
+    text-align: center; 
+  }
+  

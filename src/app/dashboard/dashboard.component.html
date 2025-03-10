@@ -14,19 +14,40 @@
   <nav class="navBar">
     <ul class="menu">
       <li><a routerLink="/profile">Profile</a></li>
-      <li><a href="#events">Events</a></li>
-      <li><a href="/helpingHand">Helping Hand</a></li>
+      <li><a routerLink="/events">Events</a></li>
+      <li><a routerLink="/helpingHand">Helping Hand</a></li>
     </ul>
     <div class="sign-out">
-      <a href="#sign-out">Sign out</a>
+      <a (click)="onSignOut()">Sign out</a>
     </div>
   </nav>
-
-  <div class="container">
-    <div class="card">
-      <h3>Bulletin Board</h3>
-      <p></p>
+  
+  <div class="card">
+    <h3>Bulletin Board</h3>
+    <div class="new-post">
+      <textarea [(ngModel)]="newPostContent" placeholder="Write something..." rows="4"></textarea>
+      <button (click)="addPost()">Post</button>
     </div>
+  
+    <div class="post-container">
+      <div class="post" *ngFor="let post of posts; let i = index">
+        <p>{{ post.content }}</p>
+        <span class="meta">Posted by {{ post.author }} on {{ post.date | date:'short' }}</span>
+        <div class="post-actions">
+          <button *ngIf="post.author === username" (click)="deletePost(i)" class="delete-btn">
+            <img src="/images/Bin.jpg" alt="Delete" width="20" height="20">
+          </button>
+          <button (click)="flagPost(post)" class="flag-btn">
+            <img src="/images/Flag.jpg" alt="Flag" width="20" height="20">
+          </button>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="isComplaintVisible" class="complaint-form">
+      <h4>Write your complaint:</h4>
+      <textarea [(ngModel)]="complaintText" placeholder="Describe the issue..." rows="4"></textarea>
+      <button (click)="onComplaint()">Submit Complaint</button>
+    </div>      
   </div>
 </body>
 </html>

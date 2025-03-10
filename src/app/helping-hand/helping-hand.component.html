@@ -9,17 +9,19 @@
 <body>   
   <div class="ticket-container">
     <div *ngFor="let ticket of tickets" class="ticket">
+      <h3>{{ ticket.creator }}</h3> 
       <h3>{{ ticket.activityName }}</h3>
       <p>{{ ticket.date }}</p>
       <p>{{ ticket.description }}</p>
       <p>Max Capacity: {{ ticket.maxCapacity }}</p>
       <p>Accepted: {{ ticket.currentCount }} / {{ ticket.maxCapacity }}</p>
-      
-      <button *ngIf="!isMaxCapacityReached(ticket)" (click)="acceptTicket(ticket)">
+  
+      <button *ngIf="!isMaxCapacityReached(ticket) && !hasUserAccepted(ticket)" (click)="onAcceptTicket(ticket)">
         Accept
-      </button>
+      </button>                  
     </div>
   </div>
+  
 
   <button class="create-button" (click)="openForm()">Create</button>
   
