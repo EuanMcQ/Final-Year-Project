@@ -7,6 +7,7 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { ProfileComponent } from './profile/profile.component';
 import { HelpingHandComponent } from './helping-hand/helping-hand.component';
 import { EventsComponent } from './events/events.component';
+import { MyticketComponent } from './myticket/myticket.component';
 
 const routes: Routes = [ //path declerations
   {path: '', component: WelcomePageComponent},
@@ -15,7 +16,8 @@ const routes: Routes = [ //path declerations
   {path: 'dashboard', component: DashboardComponent}, 
   {path: 'profile', component: ProfileComponent},
   {path: 'helpingHand', component:HelpingHandComponent},
-  {path:'events', component:EventsComponent}
+  {path:'events', component:EventsComponent},
+  {path:'myTicket', component:MyticketComponent}
 
 ];
 
