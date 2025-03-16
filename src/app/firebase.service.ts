@@ -514,5 +514,27 @@ export class FirebaseService {
       authorName: post?.author || 'Unknown author' // You could use full name from localStorage if available
     };
   }
+  
+  async getUserEvents(): Promise<any[]> {
+    const username = localStorage.getItem('username');
+    if (!username) {
+      console.error('No user is logged in.');
+      return [];
+    }
 
+    try {
+      const eventsDocRef = doc(this.db, 'tickets', username);
+      const docSnapshot = await getDoc(eventsDocRef);
+
+      if (docSnapshot.exists()) {
+        const data = docSnapshot.data();
+        return data['tickets'] || [];
+      } else {
+        return [];
+      }
+    } catch (error) {
+      console.error('Error fetching user events:', error);
+      throw error;
+    }
+  }
 }
