@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { FirebaseApp, initializeApp } from 'firebase/app';
-import { collection, getFirestore, getDoc, getDocs, doc, setDoc, arrayUnion, updateDoc} from 'firebase/firestore';
+import { collection, getFirestore, getDoc, getDocs, doc, setDoc, deleteDoc, arrayUnion, updateDoc} from 'firebase/firestore';
 
 @Injectable({
   providedIn: 'root',
@@ -353,6 +353,24 @@ export class FirebaseService {
     }
   } 
 
+  async deleteTicket(ticket: any) {
+    const username = localStorage.getItem('username');
+    if (!username) {
+      throw new Error('No logged-in user');
+    }
+  
+    try {
+      // Create a reference to the document to be deleted
+      const ticketsDocRef = doc(this.db, 'events', ticket.username); // Reference to creator's tickets
+      
+      // Use deleteDoc to delete the document
+      await deleteDoc(ticketsDocRef); 
+      console.log('Event deleted successfully');
+    } catch (error) {
+      console.error('Error deleting event:', error);
+    }
+  }
+
   async addTicketForUserEvents(event: any): Promise<void> {
     const username = localStorage.getItem('username');
     const firstName = localStorage.getItem('firstName');
@@ -366,7 +384,7 @@ export class FirebaseService {
     const newEvent = {
       ...event,
       creator: `${firstName} ${lastName}`,
-      username,
+      username: username,
       usersAccepted: [], // Initialize accepted users array
       currentCount: 0, // Ensure we have an initial count
     };
@@ -379,10 +397,10 @@ export class FirebaseService {
 
       if (docSnapshot.exists()) {
         // Merge new ticket with existing tickets
-        await setDoc(eventsDocRef, { tickets: arrayUnion(newEvent) }, { merge: true });
+        await setDoc(eventsDocRef, { events: arrayUnion(newEvent) }, { merge: true });
       } else {
         // Create a new document with the ticket array
-        await setDoc(eventsDocRef, { tickets: [newEvent] });
+        await setDoc(eventsDocRef, { events: [newEvent] });
       }
 
       console.log('Event added successfully for:', username);
@@ -392,26 +410,29 @@ export class FirebaseService {
     }
   }
 
-  async getAllTicketsEvents(): Promise<any[]> {
+  async getAllEvents(): Promise<any[]> {
     try {
       const eventsCollectionRef = collection(this.db, 'events');
       const querySnapshot = await getDocs(eventsCollectionRef);
       let allEvents: any[] = [];
-
+      
       querySnapshot.forEach((doc) => {
         const userEvents = doc.data()?.['events'] || [];
+        console.log('User Events:', userEvents);  // Check the events data
+        
         userEvents.forEach((event: any) => {
-	      allEvents.push(event);
+          allEvents.push(event);
         });
       });
-
+      
+      console.log('All Events:', allEvents);  // Check the final allEvents array
       return allEvents;
     } catch (error) {
-      console.error('Error fetching all tickets:', error);
+      console.error('Error fetching all events:', error);
       throw error;
     }
   }
-
+    
   async incrementTicketCountEvents(event: any): Promise<void> {
     const username = localStorage.getItem('username');
     if (!username) {
@@ -464,6 +485,25 @@ export class FirebaseService {
       throw error;
     }
   }
+
+  async deleteEvent(event: any) {
+    const username = localStorage.getItem('username');
+    if (!username) {
+      throw new Error('No logged-in user');
+    }
+  
+    try {
+      // Create a reference to the document to be deleted
+      const eventsDocRef = doc(this.db, 'events', event.username); // Reference to creator's tickets
+      
+      // Use deleteDoc to delete the document
+      await deleteDoc(eventsDocRef); 
+      console.log('Event deleted successfully');
+    } catch (error) {
+      console.error('Error deleting event:', error);
+    }
+  }
+
   async addComplaintToFirebase(postId: string, complaintText: string, username: string): Promise<void> {
     // Validate inputs to ensure they are not undefined
     if (!postId || !complaintText || !username) {
@@ -504,7 +544,6 @@ export class FirebaseService {
 
   // Helper method to retrieve post details based on postId (could be from localStorage or Firebase)
   getPostDetails(postId: string): any {
-    // For now, let's assume we are getting it from localStorage (or you can fetch it from Firebase if needed)
     const savedPosts = JSON.parse(localStorage.getItem('bulletinPosts') || '[]');
     const post = savedPosts.find((p: any) => p.id === postId);
     
@@ -515,26 +554,39 @@ export class FirebaseService {
     };
   }
   
-  async getUserEvents(): Promise<any[]> {
+  async getUserEvents(): Promise<{ tickets: any[]; events: any[] }> {
     const username = localStorage.getItem('username');
     if (!username) {
       console.error('No user is logged in.');
-      return [];
+      return { tickets: [], events: [] }; // Return empty arrays if no user
     }
-
+  
     try {
-      const eventsDocRef = doc(this.db, 'tickets', username);
-      const docSnapshot = await getDoc(eventsDocRef);
-
-      if (docSnapshot.exists()) {
-        const data = docSnapshot.data();
-        return data['tickets'] || [];
-      } else {
-        return [];
+      // Fetch tickets from 'tickets' collection
+      const ticketsDocRef = doc(this.db, 'tickets', username);
+      const ticketsDocSnapshot = await getDoc(ticketsDocRef);
+  
+      // Fetch events from 'events' collection
+      const eventsDocRef = doc(this.db, 'events', username);
+      const eventsDocSnapshot = await getDoc(eventsDocRef);
+  
+      let tickets = [];
+      let events = [];
+  
+      if (ticketsDocSnapshot.exists()) {
+        const ticketsData = ticketsDocSnapshot.data();
+        tickets = ticketsData['tickets'] || [];  // Default to empty if 'tickets' doesn't exist
       }
+  
+      if (eventsDocSnapshot.exists()) {
+        const eventsData = eventsDocSnapshot.data();
+        events = eventsData['events'] || [];  // Default to empty if 'events' doesn't exist
+      }
+  
+      return { tickets, events };  // Return both tickets and events
     } catch (error) {
       console.error('Error fetching user events:', error);
       throw error;
     }
-  }
+  }  
 }

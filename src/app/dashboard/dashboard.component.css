@@ -38,7 +38,25 @@ body, ul, li, a {
  background-color: #555;
  border-radius: 5px;
 }
-  
+
+.right-menu {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.right-menu .my-tickets a {
+  color: white;
+  font-size: 1.2rem;
+  padding: 0.5rem 1rem;
+  transition: background-color 0.3s;
+}
+
+.right-menu .my-tickets a:hover {
+  background-color: #555;
+  border-radius: 5px;
+}
+
 .sign-out a {
  color: white;
  font-size: 1.2rem;

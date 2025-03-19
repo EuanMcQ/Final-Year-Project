@@ -13,15 +13,21 @@
 
   <nav class="navBar">
     <ul class="menu">
-      <li><a routerLink="/profile">Profile</a></li>
-      <li><a routerLink="/events">Events</a></li>
-      <li><a routerLink="/helpingHand">Helping Hand</a></li>
-      <li><a routerLink="/myTicket">My Tickets</a></li>
+        <li><a routerLink="/profile">Profile</a></li>
+        <li><a routerLink="/events">Events</a></li>
+        <li><a routerLink="/helpingHand">Helping Hand</a></li>
     </ul>
-    <div class="sign-out">
-      <a (click)="onSignOut()">Sign out</a>
+
+    <div class="right-menu">
+        <div class="my-tickets">
+            <a routerLink="/myTicket">My Tickets</a>
+        </div>
+        <div class="sign-out">
+            <a (click)="onSignOut()">Sign out</a>
+        </div>
     </div>
-  </nav>
+</nav>
+
   
   <div class="card">
     <h3>Bulletin Board</h3>

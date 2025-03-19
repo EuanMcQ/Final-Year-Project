@@ -18,7 +18,10 @@
   
       <button *ngIf="!isMaxCapacityReached(ticket) && !hasUserAccepted(ticket)" (click)="onAcceptTicket(ticket)">
         Accept
-      </button>                  
+      </button>
+      <button *ngIf="!isTicketCreator(ticket)" (click)="deleteTicket(ticket)" class="delete-btn">
+        Delete
+      </button>                   
     </div>
   </div>
   

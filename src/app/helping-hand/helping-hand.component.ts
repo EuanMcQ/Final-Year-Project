@@ -72,5 +72,19 @@ export class HelpingHandComponent implements OnInit {
   isMaxCapacityReached(ticket: any): boolean {
     return ticket.currentCount >= ticket.maxCapacity; // Check if max capacity is reached
   }  
+
+  async deleteTicket(ticket: any) {
+    try {
+      await this.firebaseService.deleteTicket(ticket); // Assuming deleteTicket exists in FirebaseService
+      this.tickets = await this.firebaseService.getAllTickets(); // Refresh ticket list
+    } catch (error) {
+      console.error('Error deleting ticket:', error);
+    }
+  }
+  
+  isTicketCreator(ticket: any): boolean {
+    const username = localStorage.getItem('username');
+    return ticket.creator === username; // Check if the current user is the creator
+  }
 }
 
