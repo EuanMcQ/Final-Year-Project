@@ -75,17 +75,15 @@ export class EventsComponent implements OnInit {
 
   async deleteEvent(event: any) {
     try {
-      await this.firebaseService.deleteEvent(event); // Assuming deleteTicket exists in FirebaseService
-      this.events = await this.firebaseService.getAllEvents(); // Refresh ticket list
+      await this.firebaseService.deleteEvent(event);
+      this.events = await this.firebaseService.getAllEvents(); // Refresh event list
     } catch (error) {
-      console.error('Error deleting ticket:', error);
+      console.error('Error deleting event:', error);
     }
-  }
+  }  
   
   isTicketCreator(event: any): boolean {
-    const username = localStorage.getItem('username');
-    console.log('Current User:', username);  // Logs the current logged-in user
-    console.log('Event Creator:', event.creator);  // Logs the event creator's username
-    return event.creator === username;  // Check if the current user is the creator
-  }
+    const userEmail = localStorage.getItem('username'); // The logged-in user
+    return event.username === userEmail; // Only show delete if the user is the creator
+  }  
 }

@@ -75,16 +75,16 @@ export class HelpingHandComponent implements OnInit {
 
   async deleteTicket(ticket: any) {
     try {
-      await this.firebaseService.deleteTicket(ticket); // Assuming deleteTicket exists in FirebaseService
-      this.tickets = await this.firebaseService.getAllTickets(); // Refresh ticket list
+      await this.firebaseService.deleteTicket(ticket);
+      this.tickets = await this.firebaseService.getAllTickets(); // Refresh event list
     } catch (error) {
       console.error('Error deleting ticket:', error);
     }
-  }
+  }  
   
-  isTicketCreator(ticket: any): boolean {
-    const username = localStorage.getItem('username');
-    return ticket.creator === username; // Check if the current user is the creator
-  }
+  isTicketCreator(event: any): boolean {
+    const userEmail = localStorage.getItem('username'); // The logged-in user
+    return event.username === userEmail; // Only show delete if the user is the creator
+  } 
 }
 

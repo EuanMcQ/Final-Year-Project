@@ -71,6 +71,7 @@ export class FirebaseService {
       localStorage.setItem('firstName', user.fName || 'First Name Not Available');
       localStorage.setItem('lastName', user.lName || 'Last Name Not Available');
       localStorage.setItem('username', user.username);
+     
       return user;
     } else {
       throw new Error('Incorrect username or password');
@@ -353,23 +354,42 @@ export class FirebaseService {
     }
   } 
 
-  async deleteTicket(ticket: any) {
-    const username = localStorage.getItem('username');
-    if (!username) {
-      throw new Error('No logged-in user');
+  async deleteTicket(eventToDelete: any): Promise<void> {
+    const userEmail = localStorage.getItem('username'); // Use email as document ID
+  
+    if (!userEmail) {
+      console.error('No logged-in user');
+      return;
+    }
+  
+    // Ensure only the creator can delete their own event
+    if (eventToDelete.username !== userEmail) {
+      console.error('Unauthorized: You can only delete tickets you created.');
+      return;
     }
   
     try {
-      // Create a reference to the document to be deleted
-      const ticketsDocRef = doc(this.db, 'events', ticket.username); // Reference to creator's tickets
-      
-      // Use deleteDoc to delete the document
-      await deleteDoc(ticketsDocRef); 
+      const ticketsDocRef = doc(this.db, 'tickets', userEmail);
+      const docSnapshot = await getDoc(ticketsDocRef);
+  
+      if (!docSnapshot.exists()) {
+        console.error('No ticket document found for this user.');
+        return;
+      }
+  
+      const ticketData = docSnapshot.data();
+      const updatedTickets = ticketData['tickets'].filter((event: any) => 
+        event.activityName !== eventToDelete.activityName || 
+        event.date !== eventToDelete.date
+      );
+  
+      await updateDoc(ticketsDocRef, { tickets: updatedTickets });
+  
       console.log('Event deleted successfully');
     } catch (error) {
       console.error('Error deleting event:', error);
     }
-  }
+  }  
 
   async addTicketForUserEvents(event: any): Promise<void> {
     const username = localStorage.getItem('username');
@@ -486,23 +506,42 @@ export class FirebaseService {
     }
   }
 
-  async deleteEvent(event: any) {
-    const username = localStorage.getItem('username');
-    if (!username) {
-      throw new Error('No logged-in user');
+  async deleteEvent(eventToDelete: any): Promise<void> {
+    const userEmail = localStorage.getItem('username'); // Use email as document ID
+  
+    if (!userEmail) {
+      console.error('No logged-in user');
+      return;
+    }
+  
+    // Ensure only the creator can delete their own event
+    if (eventToDelete.username !== userEmail) {
+      console.error('Unauthorized: You can only delete events you created.');
+      return;
     }
   
     try {
-      // Create a reference to the document to be deleted
-      const eventsDocRef = doc(this.db, 'events', event.username); // Reference to creator's tickets
-      
-      // Use deleteDoc to delete the document
-      await deleteDoc(eventsDocRef); 
+      const eventsDocRef = doc(this.db, 'events', userEmail);
+      const docSnapshot = await getDoc(eventsDocRef);
+  
+      if (!docSnapshot.exists()) {
+        console.error('No event document found for this user.');
+        return;
+      }
+  
+      const eventData = docSnapshot.data();
+      const updatedEvents = eventData['events'].filter((event: any) => 
+        event.activityName !== eventToDelete.activityName || 
+        event.date !== eventToDelete.date
+      );
+  
+      await updateDoc(eventsDocRef, { events: updatedEvents });
+  
       console.log('Event deleted successfully');
     } catch (error) {
       console.error('Error deleting event:', error);
     }
-  }
+  }  
 
   async addComplaintToFirebase(postId: string, complaintText: string, username: string): Promise<void> {
     // Validate inputs to ensure they are not undefined
