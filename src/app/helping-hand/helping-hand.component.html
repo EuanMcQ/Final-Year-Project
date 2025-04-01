@@ -3,55 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Helping Hand</title>
+    <title>Events</title>
     <link rel="stylesheet" href="helping-hand.component.css">
 </head>
 <body>   
-  <div class="ticket-container">
-    <div *ngFor="let ticket of tickets" class="ticket">
-      <h3>{{ ticket.creator }}</h3> 
-      <h3>{{ ticket.activityName }}</h3>
-      <p>{{ ticket.date }}</p>
-      <p>{{ ticket.description }}</p>
-      <p>Max Capacity: {{ ticket.maxCapacity }}</p>
-      <p>Accepted: {{ ticket.currentCount }} / {{ ticket.maxCapacity }}</p>
-  
-      <button *ngIf="!isMaxCapacityReached(ticket) && !hasUserAccepted(ticket)" (click)="onAcceptTicket(ticket)">
-        Accept
-      </button>
-      <button *ngIf="isTicketCreator(ticket)" (click)="deleteTicket(ticket)" class="delete-btn">
-        Delete
-      </button>                   
+  <button class="info-button" (click)="showInfoPopup = !showInfoPopup">?</button>
+  <div class="info-popup" *ngIf="showInfoPopup" (click)="showInfoPopup = false">
+      <div class="info-content" (click)="$event.stopPropagation()">
+          <span class="close-btn" (click)="showInfoPopup = false">&times;</span>
+          <h2>About This Page</h2>
+          <p>Here is a place to seek a helping hand, whether you are struggling with something and need help or you wish to offer your services!</p>
+      </div>
+  </div>
+  <div class="tickets-container">
+    <h1 *ngIf="tickets.length === 0">Be the first to add an event!</h1>
+
+    <div *ngFor="let ticket of tickets" class="tickets">
+        <div class="creator-info" *ngIf="ticket.userImage || ticket.userDescription">
+            <img *ngIf="ticket.userImage" class="user-image" [src]="ticket.userImage" alt="User Image">
+            <div class="user-description" *ngIf="ticket.userDescription">
+                {{ ticket.userDescription }}
+            </div>
+        </div>
+
+        <h3>{{ ticket.creator }}</h3>
+        <h3>{{ ticket.activityName }}</h3>
+        <p>{{ ticket.date }}</p>
+        <p>{{ ticket.description }}</p>
+        <p>{{ ticket.houseAddress }}</p>
+        <p>Max Capacity: {{ ticket.maxCapacity }}</p>
+        <p>Accepted: {{ ticket.currentCount }} / {{ ticket.maxCapacity }}</p>
+
+        <button *ngIf="!isMaxCapacityReached(ticket) && !hasUserAccepted(ticket)" (click)="onAcceptTicket(ticket)">
+            Accept
+        </button>
+        <button *ngIf="isTicketCreator(ticket)" (click)="deleteTicket(ticket)" class="delete-btn">
+            Delete
+        </button>
     </div>
   </div>
-  
 
+
+  
   <button class="create-button" (click)="openForm()">Create</button>
   
-  <h1 *ngIf="tickets.length === 0">Be the first to add an event!</h1>
-  
   <button class="back-arrow" routerLink="/dashboard">&#8592; Back</button>
-
+  
   <div class="modal" *ngIf="showForm">
     <div class="modal-content">
-      <h2>Create Activity</h2>
+      <h2>Create Event</h2>
       <form (ngSubmit)="addTicket()">
         <label for="activityName">Activity Name:</label>
         <input type="text" id="activityName" [(ngModel)]="newTicket.activityName" name="activityName" required>
-
+  
         <label for="date">Date:</label>
         <input type="date" id="date" [(ngModel)]="newTicket.date" name="date" required>
-
+  
         <label for="description">Description:</label>
         <textarea id="description" [(ngModel)]="newTicket.description" name="description"></textarea>
 
+        <label for="description">Address:</label>
+        <textarea id="houseAddress" [(ngModel)]="newTicket.houseAddress" name="houseAddress"></textarea>
+  
         <label for="maxCapacity">Max Capacity:</label>
-        <input type="number" id="maxCapacity" [(ngModel)]="newTicket.maxCapacity" name="maxCapacity" required>
-
+        <input type="number" id="maxCapacity" [(ngModel)]="newTicket.maxCapacity" min="0" name="maxCapacity" required>
+  
         <button type="submit">Done</button>
         <button type="button" (click)="closeForm()">Cancel</button>
       </form>
     </div>
-  </div>
+  </div>  
 </body>
 </html>

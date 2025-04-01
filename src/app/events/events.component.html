@@ -6,30 +6,44 @@
     <title>Events</title>
     <link rel="stylesheet" href="events.component.css">
 </head>
-<body>   
+<body>
+  <button class="info-button" (click)="showInfoPopup = !showInfoPopup">?</button>
+<div class="info-popup" *ngIf="showInfoPopup" (click)="showInfoPopup = false">
+    <div class="info-content" (click)="$event.stopPropagation()">
+        <span class="close-btn" (click)="showInfoPopup = false">&times;</span>
+        <h2>About This Page</h2>
+        <p>A place for you to host or join events. If you're planning an event and would like people to join, create your ticket!</p>
+    </div>
+</div>
   <div class="event-container">
     <h1 *ngIf="events.length === 0">Be the first to add an event!</h1>
-  
+
     <div *ngFor="let event of events" class="event">
-      <h3>{{ event.creator }}</h3>
-      <h3>{{ event.activityName }}</h3>
-      <p>{{ event.date }}</p>
-      <p>{{ event.description }}</p>
-      <p>Max Capacity: {{ event.maxCapacity }}</p>
-      <p>Accepted: {{ event.currentCount }} / {{ event.maxCapacity }}</p>
+        <div class="creator-info" *ngIf="event.userImage || event.userDescription">
+            <img *ngIf="event.userImage" class="user-image" [src]="event.userImage" alt="User Image">
+            <div class="user-description" *ngIf="event.userDescription">
+                {{ event.userDescription }}
+            </div>
+        </div>
 
-      <button *ngIf="!isMaxCapacityReached(event) && !hasUserAccepted(event)" (click)="onAcceptEvent(event)">
-        Accept
-      </button>
-      <button *ngIf="isTicketCreator(event)" (click)="deleteEvent(event)" class="delete-btn">
-        Delete
-      </button>
+        <h3>{{ event.creator }}</h3>
+        <h3>{{ event.activityName }}</h3>
+        <p>{{ event.date }}</p>
+        <p>{{ event.description }}</p>
+        <p>{{ event.houseAddress }}</p>
+        <p>Max Capacity: {{ event.maxCapacity }}</p>
+        <p>Accepted: {{ event.currentCount }} / {{ event.maxCapacity }}</p>
 
+        <button *ngIf="!isMaxCapacityReached(event) && !hasUserAccepted(event)" (click)="onAcceptEvent(event)">
+            Accept
+        </button>
+        <button *ngIf="isTicketCreator(event)" (click)="deleteEvent(event)" class="delete-btn">
+            Delete
+        </button>
     </div>
   </div>
-  
+
   <button class="create-button" (click)="openForm()">Create</button>
-  
   <button class="back-arrow" routerLink="/dashboard">&#8592; Back</button>
   
   <div class="modal" *ngIf="showForm">
@@ -44,9 +58,12 @@
   
         <label for="description">Description:</label>
         <textarea id="description" [(ngModel)]="newEvent.description" name="description"></textarea>
+
+        <label for="houseAddress">Address:</label>
+        <textarea id="houseAddress" [(ngModel)]="newEvent.houseAddress" name="houseAddress"></textarea>
   
         <label for="maxCapacity">Max Capacity:</label>
-        <input type="number" id="maxCapacity" [(ngModel)]="newEvent.maxCapacity" name="maxCapacity" required>
+        <input type="number" id="maxCapacity" [(ngModel)]="newEvent.maxCapacity" name="maxCapacity" min="0" required>
   
         <button type="submit">Done</button>
         <button type="button" (click)="closeForm()">Cancel</button>

@@ -10,13 +10,16 @@ export class HelpingHandComponent implements OnInit {
   activityName: string = '';
   date: string = '';
   description: string = '';
+  houseAddress: string = '';
   maxCapacity: number | null = null;
   showForm: boolean = false;
+  showInfoPopup: boolean = false;
   tickets: any[] = [];
   newTicket: any = {
     activityName: '',
     date: '',
     description: '',
+    houseAddress: '',
     maxCapacity: null,
     currentCount: 0
   };
@@ -36,6 +39,12 @@ export class HelpingHandComponent implements OnInit {
   }
 
   async addTicket() {
+
+    if (this.newTicket.maxCapacity === null || this.newTicket.maxCapacity < 0) {
+      alert('Max Capacity can not be below 0');
+      return;
+    }
+
     try {
       await this.firebaseService.addTicketForUser(this.newTicket);
 
@@ -43,7 +52,7 @@ export class HelpingHandComponent implements OnInit {
       this.tickets = await this.firebaseService.getAllTickets();
 
       // Reset the form
-      this.newTicket = { activityName: '', date: '', description: '', maxCapacity: null, currentCount: 0 };
+      this.newTicket = { activityName: '', date: '', description: '', houseAddress: '', maxCapacity: null, currentCount: 0 };
       this.showForm = false;
     } catch (error) {
       console.error('Error adding ticket:', error);

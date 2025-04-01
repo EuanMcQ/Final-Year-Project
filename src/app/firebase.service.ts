@@ -242,31 +242,36 @@ export class FirebaseService {
     const username = localStorage.getItem('username');
     const firstName = localStorage.getItem('firstName');
     const lastName = localStorage.getItem('lastName');
-  
+    
     if (!username || !firstName || !lastName) {
       throw new Error('User details are missing.');
     }
+
+    const userImage = await this.getUserImage();  // Fetch the user image
+    const userDescription = await this.getUserDescription();  // Fetch the user description
+
+    
+    console.log("Fetched User Image:", userImage);
+    console.log("Fetched User Description:", userDescription);
   
-    // Add the creator field with the full name and initialize usersAccepted array
     const newTicket = {
       ...ticket,
       creator: `${firstName} ${lastName}`,
       username: username,
+      userImage: userImage || null,  // Add user image to ticket, fallback to null if missing
+      userDescription: userDescription || null,  // Add user description to ticket
       usersAccepted: [], // Initialize an empty array to track accepted users
     };
-  
+
     console.log("Saving ticket:", newTicket);
-  
+
     try {
-      // Store ticket under the user's document
       const ticketsDocRef = doc(this.db, 'tickets', username);
       const docSnapshot = await getDoc(ticketsDocRef);
   
       if (docSnapshot.exists()) {
-        // If document exists, add the ticket to the user's ticket list
         await setDoc(ticketsDocRef, { tickets: arrayUnion(newTicket) }, { merge: true });
       } else {
-        // If document doesn't exist, create a new one with the ticket list
         await setDoc(ticketsDocRef, { tickets: [newTicket] });
       }
   
@@ -275,7 +280,9 @@ export class FirebaseService {
       console.error('Error adding ticket:', error);
       throw error;
     }
-  }  
+  }
+
+ 
 
   async getAllTickets(): Promise<any[]> {
     try {
@@ -400,11 +407,20 @@ export class FirebaseService {
       throw new Error('User details are missing.');
     }
 
+    const userImage = await this.getUserImage();  // Fetch the user image
+    const userDescription = await this.getUserDescription();  // Fetch the user description
+
+    
+    console.log("Fetched User Image:", userImage);
+    console.log("Fetched User Description:", userDescription);
+
     // Create event object with creator info
     const newEvent = {
       ...event,
       creator: `${firstName} ${lastName}`,
       username: username,
+      userImage: userImage || null,  
+      userDescription: userDescription || null, 
       usersAccepted: [], // Initialize accepted users array
       currentCount: 0, // Ensure we have an initial count
     };
