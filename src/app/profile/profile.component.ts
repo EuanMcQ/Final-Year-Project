@@ -50,19 +50,18 @@ export class ProfileComponent implements OnInit {
     const file = event.target.files[0]; //get and display selected file
     if (file) {
       this.selectedImage = file; //store the selected file in variable
-      const reader = new FileReader(); // Helps read contents of file
+      const reader = new FileReader();
       reader.onload = () => {
         this.imagePreview = reader.result as string;
-        this.image = reader.result as string; // Store base64 string for image
+        this.image = reader.result as string; //store the file type as a string
       };
-      reader.readAsDataURL(file); // Start reading the file as a base64 data URL
+      reader.readAsDataURL(file); // read the file
     } else {
       console.log('No file selected');
       this.imagePreview = null;
     }
   }
 
-  //button which calls the service file and executes the save
   async onDescriptionSubmit(): Promise<void> {
     if (!this.description) {
       alert('Description is empty');

@@ -41,8 +41,8 @@ export class EventsComponent implements OnInit {
   }
 
   async addEvent() {
-    if (this.newEvent.maxCapacity === null || this.newEvent.maxCapacity < 0) {
-      alert('Max Capacity must be at least 0!');
+    if (this.newEvent.maxCapacity < 0) {
+      alert('Max Capacity must be at least 0 or above!');
       return;
     }
 

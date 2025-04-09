@@ -9,17 +9,24 @@ import { FirebaseService } from '../firebase.service';
 })
 export class DashboardComponent {
 
-  complaintText: string = '';  // Holds the complaint text input
-  isComplaintVisible: boolean = false;  // Toggles complaint form visibility
+  complaintText: string = '';  // holds the complaint
+  isComplaintVisible: boolean = false;  
   newPostContent: string = '';
   posts: { content: string; author: string; date: Date; id: string }[] = [];
   selectedPost: any = null;
-  username: string | null = null;  // Store the username here
+  userName: string = '';
+  fName: string = '';
+  lName: string = ''; //storing username of person who made the post
 
   constructor(private router: Router, private firebase: FirebaseService) {}
 
   ngOnInit(): void {
-    this.username = localStorage.getItem('username'); // Fetch the username from localStorage
+    const user = this.firebase.getUserFullName();
+    if (user) {
+      this.fName = user.fName;
+      this.lName = user.lName;
+      this.userName = `${this.fName} ${this.lName}`;
+    }// easy fetch from local storage
     const savedPosts = localStorage.getItem('bulletinPosts');
     if (savedPosts) {
       this.posts = JSON.parse(savedPosts);
@@ -38,28 +45,27 @@ export class DashboardComponent {
     if (this.newPostContent.trim()) {
       const newPost = {
         content: this.newPostContent,
-        author: this.username || 'Anonymous',  // Use the username here
+        author: this.userName,  
         date: new Date(),
-        id: new Date().getTime().toString(), // Generate a unique ID for each post
+        id: new Date().getTime().toString(), //generating a unique id
       };
 
       this.posts.unshift(newPost);
       localStorage.setItem('bulletinPosts', JSON.stringify(this.posts));
-      this.newPostContent = '';  // Clear the new post content field
+      this.newPostContent = '';  
     }
   }
 
   deletePost(index: number): void {
-    const post = this.posts[index]; // Get the post to be deleted
+    const post = this.posts[index]; 
   
-    // Check if the logged-in user is the author of the post
-    if (post.author === this.username) {
-      // If the current user is the author of the post, allow deletion
-      this.posts.splice(index, 1); // Delete the post
-      localStorage.setItem('bulletinPosts', JSON.stringify(this.posts)); // Update localStorage with the new list
+    
+    if (post.author === this.userName) {
+      // ensuring that only the current user can delete the post
+      this.posts.splice(index, 1); 
+      localStorage.setItem('bulletinPosts', JSON.stringify(this.posts)); // update storage
       console.log('Post deleted successfully');
     } else {
-      // If the user is not the author, prevent deletion and show a message
       console.log('You cannot delete someone else\'s post');
       alert('You can only delete your own posts');
     }
@@ -70,21 +76,19 @@ export class DashboardComponent {
     this.isComplaintVisible = true;
   }
 
-  // Submit the complaint with postId, complaintText, and username
   async onComplaint(): Promise<void> {
-    const postId = this.selectedPost?.id;  // Get the post ID (ticket ID) from selectedPost
-    const complaintText = this.complaintText;  // Get complaint text
+    const postId = this.selectedPost?.id;  // retrieving the unique id for the post
+    const complaintText = this.complaintText;  
   
-    if (!postId || !complaintText || !this.username) {
-      console.error('Complaint data is invalid:', postId, complaintText, this.username);
-      return;  // Exit if any data is missing
+    if (!postId || !complaintText || !this.userName) {
+      console.error('Complaint data is invalid:', postId, complaintText, this.userName);
+      return; 
     }
   
     try {
-      // Proceed with submitting the complaint if data is valid
-      await this.firebase.addComplaintToFirebase(postId, complaintText, this.username);
+      await this.firebase.addComplaintToFirebase(postId, complaintText, this.userName);
 
-      // After submission, reset complaint form
+      // once complaint is submitted form is then resetted.
       this.complaintText = '';
       this.isComplaintVisible = false;
       console.log('Complaint submitted successfully!');

@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { WelcomePageComponent } from './welcome-page.component';
+import { AppRoutingModule } from '../app-routing.module';
 
 describe('WelcomePageComponent', () => {
   let component: WelcomePageComponent;
@@ -8,7 +8,8 @@ describe('WelcomePageComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [WelcomePageComponent]
+      declarations: [WelcomePageComponent],
+      imports: [AppRoutingModule],
     })
     .compileComponents();
 

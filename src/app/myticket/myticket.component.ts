@@ -19,10 +19,10 @@ export class MyticketComponent {
   async fetchUserEvents(): Promise<void> {
     try {
       const { tickets, events } = await this.firebaseService.getUserEvents();
-      console.log('Fetched tickets:', tickets);  // Debugging logs
-      console.log('Fetched events:', events);    // Debugging logs
-      this.myTickets = tickets;  // Store fetched tickets
-      this.myEvents = events;    // Store fetched events
+      console.log('Fetched tickets:', tickets); 
+      console.log('Fetched events:', events);    
+      this.myTickets = tickets;  
+      this.myEvents = events;    
     } catch (error) {
       console.error('Error fetching events:', error);
     }

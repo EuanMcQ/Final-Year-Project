@@ -18,7 +18,7 @@
                   <img *ngIf="imagePreview" [src]="imagePreview" alt="Selected Image" id="image-preview"/>
               </div>
               <input type="file" id="profile-picture" (change)="uploadedImage($event)" accept="image/*">
-              <button id="image-submit" type="submit" class="save-btn">Save</button>
+              <button id="image-submit" type="submit" class="btn">Save</button>
             </div>
           </form>
             <div class="name-section">
@@ -30,9 +30,9 @@
               <label for="about">About Me:</label>
               <textarea placeholder="Write something about yourself..." id="description" name="description" rows="5" cols="30" [(ngModel)]="description"></textarea>
             </div>
-            <button id="description-submit" type="submit" class="submit-btn">Save Description</button>
+            <button id="description-submit" type="submit" class="btn">Save Description</button>
            </form>
-          <button class="back-arrow" [routerLink]="'/dashboard'">&#8592; Back</button>
+          <button class="btn back-arrow" [routerLink]="'/dashboard'">&#8592; Back</button>
         </div>
         <div class="right-div"></div>
       </div>          

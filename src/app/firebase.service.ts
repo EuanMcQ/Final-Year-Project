@@ -133,7 +133,6 @@ export class FirebaseService {
     }
   }
 
-  // Add description to Firestore
   async addDescriptionToFirestore(description: string): Promise<void> {
     const user = this.getUserFullName();
     if (!user) {
@@ -146,7 +145,7 @@ export class FirebaseService {
 
       if (docSnapshot.exists()) {
         const users = docSnapshot.data()?.['users'] || [];
-        const updatedUsers = users.map((u: any) => //Update the description if it changes.
+        const updatedUsers = users.map((u: any) => 
           u.username === user.username ? { ...u, description } : u
         );
 
@@ -162,7 +161,6 @@ export class FirebaseService {
     }
   }
 
-  // Get user description
   async getUserDescription(): Promise<string | null> {
     const user = this.getUserFullName(); //get user full name
     if (!user) {
@@ -170,12 +168,12 @@ export class FirebaseService {
     }
 
     try {
-      const credentialsDocRef = doc(this.db, 'User', 'Credentials'); //Reference Firebase db
+      const credentialsDocRef = doc(this.db, 'User', 'Credentials');
       const docSnapshot = await getDoc(credentialsDocRef); //fetch document
 
       if (docSnapshot.exists()) { //check document it exists
         const users = docSnapshot.data()?.['users'] || []; //retrieve the users to match and ensure
-        const matchedUser = users.find((u: any) => u.username === user.username); //Find the matching user
+        const matchedUser = users.find((u: any) => u.username === user.username); //ensuring its the matched user
         return matchedUser?.description || null; //return if exists
       } else {
         throw new Error('No credentials document found.');
@@ -202,8 +200,7 @@ export class FirebaseService {
           u.username === user.username ? { ...u, image } : u
         );
   
-        // Save the updated users array back to Firestore
-        await setDoc(credentialsDocRef, { users: updatedUsers }, { merge: true });
+        await setDoc(credentialsDocRef, { users: updatedUsers }, { merge: true }); //saving the updated user array
         console.log('Image updated successfully for:', user.username);
       } else {
         throw new Error('No credentials document found.');
@@ -228,7 +225,7 @@ export class FirebaseService {
       if (docSnapshot.exists()) {
         const users = docSnapshot.data()?.['users'] || [];
         const matchedUser = users.find((u: any) => u.username === user.username);
-        return matchedUser?.image || null;  // Fixed to return the image
+        return matchedUser?.image || null;  
       } else {
         throw new Error('No credentials document found.');
       }
@@ -247,20 +244,21 @@ export class FirebaseService {
       throw new Error('User details are missing.');
     }
 
-    const userImage = await this.getUserImage();  // Fetch the user image
-    const userDescription = await this.getUserDescription();  // Fetch the user description
+    const userImage = await this.getUserImage(); 
+    const userDescription = await this.getUserDescription(); 
 
     
     console.log("Fetched User Image:", userImage);
     console.log("Fetched User Description:", userDescription);
-  
+    
+    //Creating ticket object
     const newTicket = {
       ...ticket,
       creator: `${firstName} ${lastName}`,
       username: username,
-      userImage: userImage || null,  // Add user image to ticket, fallback to null if missing
-      userDescription: userDescription || null,  // Add user description to ticket
-      usersAccepted: [], // Initialize an empty array to track accepted users
+      userImage: userImage || null, 
+      userDescription: userDescription || null,  
+      usersAccepted: [],
     };
 
     console.log("Saving ticket:", newTicket);
@@ -313,37 +311,30 @@ export class FirebaseService {
     }
   
     try {
-      const ticketsDocRef = doc(this.db, 'tickets', ticket.username); // Reference to the creator's ticket document
-      const docSnapshot = await getDoc(ticketsDocRef); // Get the user's tickets document
+      const ticketsDocRef = doc(this.db, 'tickets', ticket.username); 
+      const docSnapshot = await getDoc(ticketsDocRef); // getting user ticket document
   
       if (docSnapshot.exists()) {
-        const ticketsData = docSnapshot.data()?.['tickets'] || []; // Array of tickets
+        const ticketsData = docSnapshot.data()?.['tickets'] || []; 
   
-        // Find the specific ticket by activityName and date
         const ticketIndex = ticketsData.findIndex(
-          (t: any) => t.activityName === ticket.activityName && t.date === ticket.date
+          (t: any) => t.activityName === ticket.activityName && t.date === ticket.date //finding the specific one
         );
   
         if (ticketIndex !== -1) {
-          // Get the current list of users who have accepted this ticket
           const usersAccepted = ticketsData[ticketIndex].usersAccepted || [];
   
-          // Check if the user has already accepted this ticket
           if (usersAccepted.includes(username)) {
             console.log('You have already accepted this ticket.');
-            return; // Prevent multiple accepts by the same user
-          }
+            return;
+          } //error check so user can't accept twice
   
-          // Check if there's still space left (maxCapacity not reached)
           if (ticketsData[ticketIndex].currentCount < ticketsData[ticketIndex].maxCapacity) {
-            // Increment the current count of the ticket
-            ticketsData[ticketIndex].currentCount += 1;
+            ticketsData[ticketIndex].currentCount += 1; //checking if max capacity has been reached
   
-            // Add the username to the accepted users list
             usersAccepted.push(username);
             ticketsData[ticketIndex].usersAccepted = usersAccepted;
   
-            // Save the updated ticket data back to Firestore
             await setDoc(ticketsDocRef, { tickets: ticketsData }, { merge: true });
             console.log('Ticket count updated successfully!');
           } else {
@@ -407,22 +398,22 @@ export class FirebaseService {
       throw new Error('User details are missing.');
     }
 
-    const userImage = await this.getUserImage();  // Fetch the user image
-    const userDescription = await this.getUserDescription();  // Fetch the user description
+    const userImage = await this.getUserImage();  
+    const userDescription = await this.getUserDescription(); 
 
     
     console.log("Fetched User Image:", userImage);
     console.log("Fetched User Description:", userDescription);
 
-    // Create event object with creator info
+    //creating event object
     const newEvent = {
       ...event,
       creator: `${firstName} ${lastName}`,
       username: username,
       userImage: userImage || null,  
       userDescription: userDescription || null, 
-      usersAccepted: [], // Initialize accepted users array
-      currentCount: 0, // Ensure we have an initial count
+      usersAccepted: [], 
+      currentCount: 0, 
     };
 
     console.log('Saving event:', newEvent);
@@ -432,10 +423,10 @@ export class FirebaseService {
       const docSnapshot = await getDoc(eventsDocRef);
 
       if (docSnapshot.exists()) {
-        // Merge new ticket with existing tickets
+        //merge so no event gets deleted 
         await setDoc(eventsDocRef, { events: arrayUnion(newEvent) }, { merge: true });
       } else {
-        // Create a new document with the ticket array
+        //new document created so their are distinct from one another and can see which user created what event
         await setDoc(eventsDocRef, { events: [newEvent] });
       }
 
@@ -476,33 +467,29 @@ export class FirebaseService {
     }
 
     try {
-      const eventsDocRef = doc(this.db, 'events', event.username); // Reference to creator's tickets
+      const eventsDocRef = doc(this.db, 'events', event.username); 
       const docSnapshot = await getDoc(eventsDocRef);
 
       if (docSnapshot.exists()) {
-        let eventData = docSnapshot.data()?.['events'] || []; // Retrieve event tickets
+        let eventData = docSnapshot.data()?.['events'] || []; // retrieving the events
 
-        // Find specific event in tickets
         const eventIndex = eventData.findIndex(
-          (e: any) => e.activityName === event.activityName && e.date === event.date
+          (e: any) => e.activityName === event.activityName && e.date === event.date // finding the specific ones
         );
 
         if (eventIndex !== -1) {
           const selectedEvent = eventData[eventIndex];
           const usersAccepted = selectedEvent.usersAccepted || [];
 
-          // Prevent duplicate user acceptance
           if (usersAccepted.includes(username)) {
             console.log('You have already accepted this event.');
             return;
-          }
+          } //ensure users can't accept twice
 
-          // Check capacity
           if (selectedEvent.currentCount < selectedEvent.maxCapacity) {
             selectedEvent.currentCount += 1;
-            selectedEvent.usersAccepted.push(username); // Add user
+            selectedEvent.usersAccepted.push(username); // adding the user who accepted 
 
-            // Update Firestore with new data
             eventData[eventIndex] = selectedEvent;
             await setDoc(eventsDocRef, { events: eventData }, { merge: true });
 
@@ -559,36 +546,34 @@ export class FirebaseService {
     }
   }  
 
+  
   async addComplaintToFirebase(postId: string, complaintText: string, username: string): Promise<void> {
-    // Validate inputs to ensure they are not undefined
+    //validating input to ensure details aren't missing
     if (!postId || !complaintText || !username) {
       console.error('Invalid data for complaint submission:', postId, complaintText, username);
       throw new Error('Complaint data is invalid');
     }
 
-    // Get the post details (e.g., content and author) based on postId
-    const postDetails = this.getPostDetails(postId);  // Method to retrieve the post details from localStorage or Firebase
+    const postDetails = this.getPostDetails(postId);  //simple method to get the post details
 
     const complaintData = {
       complaint: complaintText,
       date: new Date(),
-      reportedBy: username,  // Store the username of the person reporting
-      reportedByName: localStorage.getItem('fullName') || 'Anonymous',  // Store the full name if available
-      postId: postId,  // Store the ID of the ticket/post being complained about
-      postContent: postDetails.content,  // Store the content of the post being complained about
-      postAuthor: postDetails.author,  // Store the author of the post being reported
-      postAuthorName: postDetails.authorName,  // Store the author's name of the post
-    };
+      reportedBy: username,  
+      reportedByName: localStorage.getItem('fullName') || 'Anonymous',  
+      postId: postId,  
+      postContent: postDetails.content,  
+      postAuthor: postDetails.author,
+      postAuthorName: postDetails.authorName,  
+    }; //array style for report, easy identifiable data
 
     try {
-      // Document reference for the specific ticket in the 'reports' collection
-      const reportsDocRef = doc(this.db, 'reports', postId);  // Use postId as the document ID
+      const reportsDocRef = doc(this.db, 'reports', postId);  //contacting report collection
 
-      // Add complaint data to the 'complaints' array under the ticket (postId)
       await setDoc(
         reportsDocRef,
-        { complaints: arrayUnion(complaintData) },  // Append the complaint to the complaints array
-        { merge: true }  // Merge data instead of overwriting
+        { complaints: arrayUnion(complaintData) },  
+        { merge: true }
       );
       console.log('Complaint added to Firestore!');
     } catch (error) {
@@ -613,15 +598,13 @@ export class FirebaseService {
     const username = localStorage.getItem('username');
     if (!username) {
       console.error('No user is logged in.');
-      return { tickets: [], events: [] }; // Return empty arrays if no user
+      return { tickets: [], events: [] }; //return empty if no other person
     }
   
     try {
-      // Fetch tickets from 'tickets' collection
       const ticketsDocRef = doc(this.db, 'tickets', username);
       const ticketsDocSnapshot = await getDoc(ticketsDocRef);
   
-      // Fetch events from 'events' collection
       const eventsDocRef = doc(this.db, 'events', username);
       const eventsDocSnapshot = await getDoc(eventsDocRef);
   
@@ -630,15 +613,15 @@ export class FirebaseService {
   
       if (ticketsDocSnapshot.exists()) {
         const ticketsData = ticketsDocSnapshot.data();
-        tickets = ticketsData['tickets'] || [];  // Default to empty if 'tickets' doesn't exist
+        tickets = ticketsData['tickets'] || [];  
       }
   
       if (eventsDocSnapshot.exists()) {
         const eventsData = eventsDocSnapshot.data();
-        events = eventsData['events'] || [];  // Default to empty if 'events' doesn't exist
+        events = eventsData['events'] || [];  
       }
   
-      return { tickets, events };  // Return both tickets and events
+      return { tickets, events };  //returning both
     } catch (error) {
       console.error('Error fetching user events:', error);
       throw error;
