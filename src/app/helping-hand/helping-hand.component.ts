@@ -48,10 +48,9 @@ export class HelpingHandComponent implements OnInit {
     try {
       await this.firebaseService.addTicketForUser(this.newTicket);
 
-      // Fetch updated tickets list from Firestore
+      //fetch all the tickets
       this.tickets = await this.firebaseService.getAllTickets();
 
-      // Reset the form
       this.newTicket = { activityName: '', date: '', description: '', houseAddress: '', maxCapacity: null, currentCount: 0 };
       this.showForm = false;
     } catch (error) {
@@ -61,10 +60,9 @@ export class HelpingHandComponent implements OnInit {
 
   async onAcceptTicket(ticket: any) {
     try {
-      // Call the incrementTicketCount method
       await this.firebaseService.incrementTicketCount(ticket);
   
-      // Refresh the ticket list after accepting
+      // refreshes the ticket count if user accepts
       this.tickets = await this.firebaseService.getAllTickets();
       console.log('Ticket accepted!');
     } catch (error) {
@@ -75,25 +73,25 @@ export class HelpingHandComponent implements OnInit {
   
   hasUserAccepted(ticket: any): boolean {
     const username = localStorage.getItem('username');
-    return ticket.usersAccepted && ticket.usersAccepted.includes(username); // Check if user has already accepted
+    return ticket.usersAccepted && ticket.usersAccepted.includes(username); // ensure user hasn't already accepted
   }
   
   isMaxCapacityReached(ticket: any): boolean {
-    return ticket.currentCount >= ticket.maxCapacity; // Check if max capacity is reached
+    return ticket.currentCount >= ticket.maxCapacity; // ensure max capacity is reached
   }  
 
   async deleteTicket(ticket: any) {
     try {
       await this.firebaseService.deleteTicket(ticket);
-      this.tickets = await this.firebaseService.getAllTickets(); // Refresh event list
+      this.tickets = await this.firebaseService.getAllTickets(); // refresh the list
     } catch (error) {
       console.error('Error deleting ticket:', error);
     }
   }  
   
   isTicketCreator(event: any): boolean {
-    const userEmail = localStorage.getItem('username'); // The logged-in user
-    return event.username === userEmail; // Only show delete if the user is the creator
+    const userEmail = localStorage.getItem('username'); 
+    return event.username === userEmail; // only show delete if the user is the creator
   } 
 }
 

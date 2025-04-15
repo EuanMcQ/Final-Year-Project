@@ -20,18 +20,22 @@ export class DashboardComponent {
 
   constructor(private router: Router, private firebase: FirebaseService) {}
 
-  ngOnInit(): void {
-    const user = this.firebase.getUserFullName();
-    if (user) {
-      this.fName = user.fName;
-      this.lName = user.lName;
-      this.userName = `${this.fName} ${this.lName}`;
-    }// easy fetch from local storage
-    const savedPosts = localStorage.getItem('bulletinPosts');
-    if (savedPosts) {
-      this.posts = JSON.parse(savedPosts);
+  async ngOnInit(): Promise<void> {
+    try {
+      const user = this.firebase.getUserFullName();
+      if (user) {
+        this.fName = user.fName;
+        this.lName = user.lName;
+        this.userName = `${this.fName} ${this.lName}`;
+      }
+  
+      this.posts = await this.firebase.getAllBulletinPosts();
+    } catch (error) {
+      console.error('Failed to load posts:', error);
     }
   }
+  
+  
 
   onSignOut(): void {
     this.router.navigate(['/']);
@@ -41,54 +45,52 @@ export class DashboardComponent {
     this.router.navigate(['/profile']);
   }
 
-  addPost(): void {
+  async addPost(): Promise<void> {
     if (this.newPostContent.trim()) {
       const newPost = {
         content: this.newPostContent,
-        author: this.userName,  
+        author: this.userName,
         date: new Date(),
-        id: new Date().getTime().toString(), //generating a unique id
+        id: new Date().getTime().toString(),
       };
-
-      this.posts.unshift(newPost);
-      localStorage.setItem('bulletinPosts', JSON.stringify(this.posts));
-      this.newPostContent = '';  
+  
+      try {
+        await this.firebase.addPostToFirebase(newPost, this.userName);
+        this.posts.unshift(newPost);
+        this.newPostContent = '';
+      } catch (error) {
+        console.error('Failed to post to Firebase:', error);
+      }
     }
   }
-
-  deletePost(index: number): void {
-    const post = this.posts[index]; 
   
-    
+  async deletePost(index: number): Promise<void> {
+    const post = this.posts[index];
     if (post.author === this.userName) {
-      // ensuring that only the current user can delete the post
-      this.posts.splice(index, 1); 
-      localStorage.setItem('bulletinPosts', JSON.stringify(this.posts)); // update storage
+      this.posts.splice(index, 1);
+      await this.firebase.deletePostFromFirebase(post.id, this.userName);
       console.log('Post deleted successfully');
     } else {
-      console.log('You cannot delete someone else\'s post');
       alert('You can only delete your own posts');
     }
   }
-
+  
   flagPost(post: any): void {
     this.selectedPost = post;
     this.isComplaintVisible = true;
   }
-
+  
   async onComplaint(): Promise<void> {
-    const postId = this.selectedPost?.id;  // retrieving the unique id for the post
-    const complaintText = this.complaintText;  
+    const postId = this.selectedPost?.postId || this.selectedPost?.id;
+    const complaintText = this.complaintText;
   
     if (!postId || !complaintText || !this.userName) {
       console.error('Complaint data is invalid:', postId, complaintText, this.userName);
-      return; 
+      return;
     }
   
     try {
-      await this.firebase.addComplaintToFirebase(postId, complaintText, this.userName);
-
-      // once complaint is submitted form is then resetted.
+      await this.firebase.addComplaintToFirebase(postId, complaintText, this.userName, this.selectedPost);
       this.complaintText = '';
       this.isComplaintVisible = false;
       console.log('Complaint submitted successfully!');

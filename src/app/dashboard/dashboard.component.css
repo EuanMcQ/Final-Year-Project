@@ -73,8 +73,7 @@ body, ul, li, a {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 75vh;
-  min-length: 75vh;
+  min-height: 35vh;
   width: 100%;
 }
 
@@ -154,7 +153,7 @@ body, ul, li, a {
 }
 
 .complaint-form textarea {
-  width: 100%;
+  width: 90%;
   height: 100px;
   padding: 10px;
   border-radius: 5px;
@@ -172,3 +171,38 @@ body, ul, li, a {
 .complaint-form button:hover {
   background-color: #cc3f3f;
 }
+
+.new-post {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.new-post textarea {
+  width: 97%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  resize: vertical;
+  font-size: 1rem;
+}
+
+.new-post button {
+  background-color: #007bff; 
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.new-post button:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
+}
+
+

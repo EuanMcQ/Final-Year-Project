@@ -546,53 +546,107 @@ export class FirebaseService {
     }
   }  
 
+  async addPostToFirebase(post: any, username: string): Promise<void> {
+    const newPost = {
+      postId: post.id,
+      postContent: post.content,
+      postAuthor: username,
+      postAuthorName: username,
+      date: post.date,
+    };
   
-  async addComplaintToFirebase(postId: string, complaintText: string, username: string): Promise<void> {
-    //validating input to ensure details aren't missing
-    if (!postId || !complaintText || !username) {
-      console.error('Invalid data for complaint submission:', postId, complaintText, username);
-      throw new Error('Complaint data is invalid');
-    }
-
-    const postDetails = this.getPostDetails(postId);  //simple method to get the post details
-
-    const complaintData = {
-      complaint: complaintText,
-      date: new Date(),
-      reportedBy: username,  
-      reportedByName: localStorage.getItem('fullName') || 'Anonymous',  
-      postId: postId,  
-      postContent: postDetails.content,  
-      postAuthor: postDetails.author,
-      postAuthorName: postDetails.authorName,  
-    }; //array style for report, easy identifiable data
-
     try {
-      const reportsDocRef = doc(this.db, 'reports', postId);  //contacting report collection
-
-      await setDoc(
-        reportsDocRef,
-        { complaints: arrayUnion(complaintData) },  
-        { merge: true }
-      );
+      const postDocRef = doc(this.db, 'Bulletin board', username);
+      const docSnapshot = await getDoc(postDocRef);
+  
+      if (docSnapshot.exists()) {
+        await setDoc(postDocRef, { posts: arrayUnion(newPost) }, { merge: true });
+      } else {
+        await setDoc(postDocRef, { posts: [newPost] });
+      }
+  
+      console.log('Post added successfully for:', username);
+    } catch (error) {
+      console.error('Error adding post:', error);
+      throw error;
+    }
+  }
+  
+  async getAllBulletinPosts(): Promise<any[]> {
+    const bulletinRef = collection(this.db, 'Bulletin board');
+    const snapshot = await getDocs(bulletinRef);
+    const allPosts: any[] = [];
+  
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const userPosts = (data['posts'] || []).map((post: any) => ({
+        content: post.postContent,
+        author: post.postAuthor,
+        date: post.date instanceof Date ? post.date : post.date.toDate(), //converter if the data is not a date and is measured in seconds or miliseconds
+        id: post.postId
+      }));
+      allPosts.push(...userPosts);
+    });
+  
+    allPosts.sort((a, b) => b.date.getTime() - a.date.getTime());
+    return allPosts;
+  }
+  
+  
+  
+  
+  async addComplaintToFirebase(postId: string, complaintText: string, username: string, postDetails: any): Promise<void> {
+    const postContent = postDetails?.content ?? postDetails?.postContent ?? '';
+    const postAuthor = postDetails?.author ?? postDetails?.postAuthor ?? '';
+    const postAuthorName = postDetails?.authorName ?? postDetails?.postAuthorName ?? '';
+  
+    const complaintData = {
+      complaint: complaintText ?? '',
+      date: new Date(),
+      reportedBy: username ?? '',
+      reportedByName: username ?? '',
+      postId: postId ?? '',
+      postContent,
+      postAuthor,
+      postAuthorName,
+    };
+  
+    console.log('Final complaint data:', complaintData);
+  
+    try {
+      const sanitizedUsername = (username || 'anonymous').replace(/\s+/g, '_'); // replaces the randomly generated firebase id with the user who made the complaint
+      const reportsDocRef = doc(this.db, 'reports', sanitizedUsername);
+  
+      await setDoc(reportsDocRef, {
+        complaints: arrayUnion(complaintData)
+      }, { merge: true });
+  
       console.log('Complaint added to Firestore!');
     } catch (error) {
       console.error('Error adding complaint to Firestore:', error);
       throw error;
     }
   }
-
-  // Helper method to retrieve post details based on postId (could be from localStorage or Firebase)
-  getPostDetails(postId: string): any {
-    const savedPosts = JSON.parse(localStorage.getItem('bulletinPosts') || '[]');
-    const post = savedPosts.find((p: any) => p.id === postId);
-    
-    return {
-      content: post?.content || 'No content available',
-      author: post?.author || 'Unknown author',
-      authorName: post?.author || 'Unknown author' // You could use full name from localStorage if available
-    };
+  
+  
+  
+  async deletePostFromFirebase(postId: string, username: string): Promise<void> {
+    try {
+      const postDocRef = doc(this.db, 'Bulletin board', username);
+      const docSnapshot = await getDoc(postDocRef);
+  
+      if (docSnapshot.exists()) {
+        const data = docSnapshot.data();
+        const updatedPosts = (data['posts'] || []).filter((p: any) => p.postId !== postId);
+  
+        await setDoc(postDocRef, { posts: updatedPosts }, { merge: true });
+        console.log('Post deleted from Firebase');
+      }
+    } catch (error) {
+      console.error('Error deleting post from Firebase:', error);
+    }
   }
+  
   
   async getUserEvents(): Promise<{ tickets: any[]; events: any[] }> {
     const username = localStorage.getItem('username');

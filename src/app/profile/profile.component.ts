@@ -24,7 +24,7 @@ export class ProfileComponent implements OnInit {
       this.lName = user.lName;
       this.userName = `${this.fName} ${this.lName}`;
   
-      // Load the description for the logged-in user
+      // loading of the description
       this.firebaseService.getUserDescription().then((desc) => {
         if (desc) {
           this.description = desc;
@@ -33,7 +33,7 @@ export class ProfileComponent implements OnInit {
         console.error('Error fetching description:', error);
       });
 
-      // Load the image for the logged-in user if available
+      // loading the image for the user, there specific one
       this.firebaseService.getUserImage().then((imageUrl) => {
         if (imageUrl) {
           this.imagePreview = imageUrl;

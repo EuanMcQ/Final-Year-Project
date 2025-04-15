@@ -13,7 +13,8 @@ import { EventsComponent } from '../events/events.component';
 import { MyticketComponent } from '../myticket/myticket.component';
 import { FirebaseService } from '../firebase.service';
 
-@NgModule({ //module allows components to be declared and work together
+//module allows components to be declared and work together
+@NgModule({ 
   declarations: [AppComponent, WelcomePageComponent,  LoginComponent, SignUpComponent, DashboardComponent, ProfileComponent, HelpingHandComponent, EventsComponent, MyticketComponent,],
   imports: [AppRoutingModule, BrowserModule, FormsModule],
   providers: [FirebaseService],

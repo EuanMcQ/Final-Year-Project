@@ -40,7 +40,7 @@
         <div class="post" *ngFor="let post of posts; let i = index">
           <p>{{ post.content }}</p>
           <span class="meta">Posted by {{ post.author }} on {{ post.date | date:'short' }}</span>
-        <div class="post-actions">
+          <div class="post-actions">
             <button *ngIf="post.author === userName" (click)="deletePost(i)" class="delete-btn">
             <img src="/images/Bin.jpg" alt="Delete" width="20" height="20">
             </button>
@@ -48,13 +48,13 @@
             <img src="/images/Flag.jpg" alt="Flag" width="20" height="20">
             </button>
           </div>
-        </div>
-      </div>
-        <div *ngIf="isComplaintVisible" class="complaint-form">
-          <h4>Write your complaint:</h4>
-            <textarea [(ngModel)]="complaintText" placeholder="Describe the issue..." rows="4"></textarea>
+          <div *ngIf="isComplaintVisible && selectedPost === post" class="complaint-form">
+            <h4>Write your complaint:</h4>
+            <textarea [(ngModel)]="complaintText" placeholder="What bothered you..." rows="4"></textarea>
             <button (click)="onComplaint()">Submit Complaint</button>
-        </div>      
+          </div>
+        </div>
+      </div>     
       </div>
     </div>
   </body>
