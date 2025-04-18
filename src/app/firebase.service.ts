@@ -25,7 +25,7 @@ export class FirebaseService {
     this.db = getFirestore(this.app);
   }
 
-  // Helper function to get user from Firestore
+  //function to get user from Firestore
   private async fetchUserFromFirestore(email: string): Promise<any> {
     try {
       const credentialsDocRef = doc(this.db, 'User', 'Credentials');
@@ -44,7 +44,7 @@ export class FirebaseService {
     }
   }
 
-  // Add user to Firestore
+  //add user to Firestore
   async addUserToFirestore(userConfig: any): Promise<void> {
     try {
       const credentialsDocRef = doc(this.db, 'User', 'Credentials');
@@ -59,15 +59,15 @@ export class FirebaseService {
     }
   }
 
-  // Login user and store user data
+  //log the user in and store user data for further use
   async login(email: string, password: string): Promise<any> {
     const user = await this.fetchUserFromFirestore(email);
 
     if (user && user.password === password) {
       console.log('User logged in successfully:', user);
-      this.loggedInUser = user; // Store logged-in user
+      this.loggedInUser = user; 
 
-      // Store details in localStorage for access
+      // store user details in localStorage for access for further use
       localStorage.setItem('firstName', user.fName || 'First Name Not Available');
       localStorage.setItem('lastName', user.lName || 'Last Name Not Available');
       localStorage.setItem('username', user.username);
@@ -78,12 +78,11 @@ export class FirebaseService {
     }
   }
 
-  // Get user credentials for the profile
+  //getting user credentials for the profile
   async getUserCredentials(email: string): Promise<any> {
     const user = await this.fetchUserFromFirestore(email);
 
     if (user) {
-      // Store user data in localStorage for easy access later
       localStorage.setItem('firstName', user.fName || 'First Name Not Available');
       localStorage.setItem('lastName', user.lName || 'Last Name Not Available');
       console.log('Matched user:', user);
@@ -92,7 +91,7 @@ export class FirebaseService {
     return null;
   }
 
-  // Get the full name of the logged-in user (either from localStorage or current user)
+  //getting the logged in user name for bulletin board, profile and other tabs 
   getUserFullName(): { fName: string; lName: string; username: string } | null {
     const user = this.loggedInUser || {
       fName: localStorage.getItem('firstName'),
@@ -110,7 +109,7 @@ export class FirebaseService {
     return null;
   }
 
-  // Update user profile
+  //updating profile if any changes are made
   async updateUserProfile(userConfig: any): Promise<void> {
     try {
       const credentialsDocRef = doc(this.db, 'User', 'Credentials');
@@ -122,7 +121,7 @@ export class FirebaseService {
           u.username === userConfig.username ? { ...u, ...userConfig } : u
         );
 
-        // Save the updated users array back to Firestore
+        //updating the collection data with the new updated data
         await setDoc(credentialsDocRef, { users: updatedUsers }, { merge: true });
       } else {
         throw new Error('No credentials document found.');
@@ -149,7 +148,6 @@ export class FirebaseService {
           u.username === user.username ? { ...u, description } : u
         );
 
-        // Save the updated users array back to Firestore
         await setDoc(credentialsDocRef, { users: updatedUsers }, { merge: true });
         console.log('Description updated successfully for:', user.username);
       } else {
@@ -251,7 +249,7 @@ export class FirebaseService {
     console.log("Fetched User Image:", userImage);
     console.log("Fetched User Description:", userDescription);
     
-    //Creating ticket object
+    //creation of the ticket object to be saved to collection
     const newTicket = {
       ...ticket,
       creator: `${firstName} ${lastName}`,
@@ -360,7 +358,7 @@ export class FirebaseService {
       return;
     }
   
-    // Ensure only the creator can delete their own event
+    //ensuring that only the creator themselves can delete the event associated to them
     if (eventToDelete.username !== userEmail) {
       console.error('Unauthorized: You can only delete tickets you created.');
       return;
@@ -445,14 +443,14 @@ export class FirebaseService {
       
       querySnapshot.forEach((doc) => {
         const userEvents = doc.data()?.['events'] || [];
-        console.log('User Events:', userEvents);  // Check the events data
+        console.log('User Events:', userEvents); // quick check of data before display
         
         userEvents.forEach((event: any) => {
           allEvents.push(event);
         });
       });
       
-      console.log('All Events:', allEvents);  // Check the final allEvents array
+      console.log('All Events:', allEvents);  
       return allEvents;
     } catch (error) {
       console.error('Error fetching all events:', error);
@@ -471,10 +469,10 @@ export class FirebaseService {
       const docSnapshot = await getDoc(eventsDocRef);
 
       if (docSnapshot.exists()) {
-        let eventData = docSnapshot.data()?.['events'] || []; // retrieving the events
+        let eventData = docSnapshot.data()?.['events'] || []; //retrieving the events
 
         const eventIndex = eventData.findIndex(
-          (e: any) => e.activityName === event.activityName && e.date === event.date // finding the specific ones
+          (e: any) => e.activityName === event.activityName && e.date === event.date //finding the specific ones
         );
 
         if (eventIndex !== -1) {
@@ -488,7 +486,7 @@ export class FirebaseService {
 
           if (selectedEvent.currentCount < selectedEvent.maxCapacity) {
             selectedEvent.currentCount += 1;
-            selectedEvent.usersAccepted.push(username); // adding the user who accepted 
+            selectedEvent.usersAccepted.push(username); //adding the user who accepted 
 
             eventData[eventIndex] = selectedEvent;
             await setDoc(eventsDocRef, { events: eventData }, { merge: true });
@@ -510,14 +508,14 @@ export class FirebaseService {
   }
 
   async deleteEvent(eventToDelete: any): Promise<void> {
-    const userEmail = localStorage.getItem('username'); // Use email as document ID
+    const userEmail = localStorage.getItem('username'); //using the username to ensure that the one being deleted is theirs
   
     if (!userEmail) {
       console.error('No logged-in user');
       return;
     }
   
-    // Ensure only the creator can delete their own event
+    //ensuring only the creator can delete their own event
     if (eventToDelete.username !== userEmail) {
       console.error('Unauthorized: You can only delete events you created.');
       return;
@@ -614,7 +612,7 @@ export class FirebaseService {
     console.log('Final complaint data:', complaintData);
   
     try {
-      const sanitizedUsername = (username || 'anonymous').replace(/\s+/g, '_'); // replaces the randomly generated firebase id with the user who made the complaint
+      const sanitizedUsername = (username || 'anonymous').replace(/\s+/g, '_'); //replaces the randomly generated firebase id with the user who made the complaint
       const reportsDocRef = doc(this.db, 'reports', sanitizedUsername);
   
       await setDoc(reportsDocRef, {

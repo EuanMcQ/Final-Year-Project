@@ -24,7 +24,7 @@ export class ProfileComponent implements OnInit {
       this.lName = user.lName;
       this.userName = `${this.fName} ${this.lName}`;
   
-      // loading of the description
+      //loading of the description
       this.firebaseService.getUserDescription().then((desc) => {
         if (desc) {
           this.description = desc;
@@ -33,7 +33,7 @@ export class ProfileComponent implements OnInit {
         console.error('Error fetching description:', error);
       });
 
-      // loading the image for the user, there specific one
+      //loading the image for the user, there specific one
       this.firebaseService.getUserImage().then((imageUrl) => {
         if (imageUrl) {
           this.imagePreview = imageUrl;
@@ -55,7 +55,7 @@ export class ProfileComponent implements OnInit {
         this.imagePreview = reader.result as string;
         this.image = reader.result as string; //store the file type as a string
       };
-      reader.readAsDataURL(file); // read the file
+      reader.readAsDataURL(file); //read the file
     } else {
       console.log('No file selected');
       this.imagePreview = null;
@@ -67,7 +67,7 @@ export class ProfileComponent implements OnInit {
       alert('Description is empty');
       return;
     }
-    try { // calling the firebase service file
+    try { //calling the firebase service file
       await this.firebaseService.addDescriptionToFirestore(this.description); 
       alert('Description saved successfully!');
     } catch (error) {

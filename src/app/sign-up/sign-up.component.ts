@@ -8,14 +8,13 @@ import { FirebaseService } from '../firebase.service';
   styleUrls: ['./sign-up.component.css'],
 })
 export class SignUpComponent {
-  user = {
+  user = { //placeholder fields for all the inputted data
     fName: '',
     lName: '',
     username: '',
     password: '',
     confirmPassword: '',
     estate: '',
-    //Following are placeholder fields. Can be updated on profile page.
     description: '',
     image: '',
   };
@@ -23,7 +22,7 @@ export class SignUpComponent {
   constructor(private router: Router, private firebaseService: FirebaseService) {}
 
   async onSignUpSubmit() {
-    // password match checker
+    //password match checker
     if (this.user.password !== this.user.confirmPassword) {
       alert('Passwords do not match!');
       return;
@@ -42,7 +41,7 @@ export class SignUpComponent {
       };
 
       try {
-        await this.firebaseService.addUserToFirestore(userConfig); // using service
+        await this.firebaseService.addUserToFirestore(userConfig); //using service
         console.log('User added to Firestore successfully.');
         this.router.navigate(['/']);
         this.resetForm();

@@ -9,7 +9,7 @@ import { FirebaseService } from '../firebase.service';
 })
 export class DashboardComponent {
 
-  complaintText: string = '';  // holds the complaint
+  complaintText: string = '';  //holds the complaint
   isComplaintVisible: boolean = false;  
   newPostContent: string = '';
   posts: { content: string; author: string; date: Date; id: string }[] = [];
