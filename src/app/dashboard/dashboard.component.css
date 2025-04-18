@@ -130,10 +130,16 @@ body, ul, li, a {
   padding: 5px;
 }
 
-.delete-btn img, .flag-btn img {
-  width: 20px; 
-  height: 20px; 
+.delete-btn img {
+  width: 40px; 
+  height: 40px; 
   transition: transform 0.3s ease; 
+}
+
+.flag-btn img {
+  width: 25px; 
+  height: 25px; 
+  transition: transform 0.3s ease;
 }
 
 .delete-btn:hover img {

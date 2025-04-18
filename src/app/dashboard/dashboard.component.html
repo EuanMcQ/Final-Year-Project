@@ -42,10 +42,10 @@
           <span class="meta">Posted by {{ post.author }} on {{ post.date | date:'short' }}</span>
           <div class="post-actions">
             <button *ngIf="post.author === userName" (click)="deletePost(i)" class="delete-btn">
-            <img src="/images/Bin.jpg" alt="Delete" width="20" height="20">
+            <img src ="https://png.pngtree.com/png-vector/20220606/ourmid/pngtree-trash-can-bin-background-vector-png-image_4876782.png" alt="Delete" width="20" height="20">
             </button>
             <button (click)="flagPost(post)" class="flag-btn">
-              <img src="/images/Flag.jpg" alt="Flag" width="20" height="20">
+              <img src="https://static.vecteezy.com/system/resources/previews/005/215/491/large_2x/flag-black-color-vector.jpg" alt="Flag" width="20" height="20">
             </button>
           </div>
           <div *ngIf="isComplaintVisible && selectedPost === post" class="complaint-form">
